@@ -19,11 +19,11 @@ pipeline {
           }
         }
       }
-      post{
-        always{
-          junit '**/target/*-reports/TEST-*.xml'
-        }
-      }
+      //post{
+      //  always{
+      //    junit '**/target/*-reports/TEST-*.xml'
+      //  }
+      // }
     }
     stage('SonarQube Analysis'){
       steps{
@@ -35,7 +35,7 @@ pipeline {
         }
       }
     }
-  stage('compite code & package'){
+  stage('compile code & package'){
     steps{
       echo "Static code analysis"
       dir('artifacts'){
@@ -44,8 +44,17 @@ pipeline {
         }
       }
     }
-  }  
-    
+    }
+  stage('Build Image'){
+    steps{
+      echo "Build docker image"
+      script{
+        sh 'cp ${JENKINS_HOME}/workspace/${JOB_NAME}/artifacts/target/addressbook.war .'
+        doContainer = docker.build("juned/addressbook:${BUILD_NUMBER}")
+        //echo customImage
+      }
+    }
+  }    
   }
 }
 
