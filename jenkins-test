@@ -1,0 +1,51 @@
+def doContainer
+pipeline {
+  agent any
+  
+  stages{
+    stage ('SCM Checkout'){
+      steps{
+        dir('artifacts'){
+          git url: 'https://github.com/juned/DevOpsClassCodes'
+        }
+      }
+    }
+    stage('Test Package'){
+      steps{
+        echo "Maven test started"
+        dir('artifacts'){
+          withMaven(maven: maven){
+            sh 'mvn test'
+          }
+        }
+      }
+      post{
+        always{
+          junit '**/target/*-reports/TEST-*.xml'
+        }
+      }
+    }
+    stage('SonarQube Analysis'){
+      steps{
+        echo "Static code Analysis"
+        dir('artifacts'){
+          withMaven(maven: maven){
+            sh 'mvn sonar:sonar'
+          }
+        }
+      }
+    }
+  stage('compite code & package'){
+    steps{
+      echo "Static code analysis"
+      dir('artifacts'){
+        withMaven(maven: maven){
+          sh 'mvn package'
+        }
+      }
+    }
+  }  
+    
+  }
+}
+
